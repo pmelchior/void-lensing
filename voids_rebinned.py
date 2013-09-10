@@ -9,9 +9,8 @@ if __name__ == '__main__':
     hdu = get_lensing_data()
     
     # apply selection
-    selection = np.ones(len(hdu[1].data), dtype="bool") # all voids
     lrgs = get_LRG_sample(hdu[1].data)
-    selection &= lrgs
+    selection = (lrgs == False) # main sample
     print sum(selection), "voids selected"
 
     # define binning
