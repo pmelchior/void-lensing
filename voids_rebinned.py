@@ -9,21 +9,27 @@ if __name__ == '__main__':
     hdu = get_lensing_data()
     
     # apply selection
+    """
+    # only main sample (everything not in LRG sample):
     lrgs = get_LRG_sample(hdu[1].data)
-    selection = (lrgs == False) # main sample
+    selection = (lrgs == False)
+    """
+    selection = np.ones(len(hdu[1].data), dtype="bool")
     print sum(selection), "voids selected"
 
     # define binning
     rbins = np.linspace(0.15, 2.4, 12)
 
     # get bootstrap profiles
+    print "bootstrapping may take a while..."
     Emode, e_Emode, Bmode, e_Bmode, r_mean = stack_EBR(hdu[1].data, selection, rbins, rebinned=True, samples=5000, mean_method=kappa_sigma)
     
     # compute chi^2 and likelihood ratio wrt to void model
     model = void_model(rbins)
     K = likelihood_ratio(Emode, e_Emode,  model)
     Chi2 = chi2(Emode, e_Emode,  model)
-    
+    S_N = SNR(Emode, e_Emode, model)
+
     # plot data and model
     figure()
     ax = subplot(111)

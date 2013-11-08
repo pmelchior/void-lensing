@@ -283,7 +283,7 @@ def deltaChi2(delta_sigma, e_sigma, model_val):
     return chi2_model - chi2_zero
 
 def likelihood_ratio(delta_sigma, e_sigma, model_val):
-    """Likelihood ratio for the model and the null
+    """Likelihood ratio for the model and the null.
 
     For gaussian likelihoods, the ratio is given by
     exp(-1/2 delta_chi**2)
@@ -296,6 +296,16 @@ def likelihood_ratio(delta_sigma, e_sigma, model_val):
     """
     dchi2 = deltaChi2(delta_sigma, e_sigma, model_val)
     return np.exp(-(dchi2)/2)
+
+def SNR(delta_sigma, e_sigma, model):
+    """ Signal-to-noise ratio of the data given the model.
+
+    Args:
+        delta_sigma: measured lensing signal
+        e_sigma: error (rms) of the measurements
+        model_val: the values to compare with the data
+    """
+    return (delta_sigma * model).sum()/(model**2 * e_sigma**2).sum()**0.5
 
 def get_void_catalog():
     """Get the void catalog.
