@@ -256,33 +256,41 @@ def void_model(rbins=None, void_radius=None):
         else:
             return (model[:,0]*void_radius, model[:,1]*void_radius)
 
-def chi2(delta_sigma, e_sigma, model_val):
+def chi2(delta_sigma, e_sigma, model_val, N):
     """Inverse-variance weighted sum of squared residuals.
 
     Entries with e_sigma == 0 are ignored.
 
+    To correct for the bias in the inversion of the covariance matrix,
+    the factor (N-B-2)/(N-1) is applied, where B denotes the nuber of bins in
+    the profile (see Hartlap et al. 2007 for details).
+    
     Args:
         delta_sigma: array of measured lensing signal
         e_sigma: array of error (rms) of the measurements
         model_val: array of the values to compare with the data
+        N: number of voids
     """
     has_data = e_sigma > 0
-    return (((delta_sigma[has_data] - model_val[has_data])**2)/e_sigma[has_data]**2).sum()
+    B = sum(has_data)
+    debias = (N-B-2.)/(N-1)
+    return debias*(((delta_sigma[has_data] - model_val[has_data])**2)/e_sigma[has_data]**2).sum()
 
-def deltaChi2(delta_sigma, e_sigma, model_val):
+def deltaChi2(delta_sigma, e_sigma, model_val, N):
     """Difference of chi2 between model and null.
 
     Args:
         delta_sigma: measured lensing signal
         e_sigma: error (rms) of the measurements
         model_val: the values to compare with the data
+        N: number of voids
     """
     model_zero = np.zeros_like(delta_sigma)
-    chi2_model = chi2(delta_sigma, e_sigma, model_val)
-    chi2_zero = chi2(delta_sigma, e_sigma, model_zero)
+    chi2_model = chi2(delta_sigma, e_sigma, model_val, N)
+    chi2_zero = chi2(delta_sigma, e_sigma, model_zero, N)
     return chi2_model - chi2_zero
 
-def likelihood_ratio(delta_sigma, e_sigma, model_val):
+def likelihood_ratio(delta_sigma, e_sigma, model_val, N):
     """Likelihood ratio for the model and the null.
 
     For gaussian likelihoods, the ratio is given by
@@ -293,8 +301,9 @@ def likelihood_ratio(delta_sigma, e_sigma, model_val):
         delta_sigma: measured lensing signal
         e_sigma: error (rms) of the measurements
         model_val: the values to compare with the data
+        N: number of voids
     """
-    dchi2 = deltaChi2(delta_sigma, e_sigma, model_val)
+    dchi2 = deltaChi2(delta_sigma, e_sigma, model_val, N)
     return np.exp(-(dchi2)/2)
 
 def SNR(delta_sigma, e_sigma, model):

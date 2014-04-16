@@ -15,19 +15,20 @@ if __name__ == '__main__':
     selection = (lrgs == False)
     """
     selection = np.ones(len(hdu[1].data), dtype="bool")
-    print sum(selection), "voids selected"
+    N = sum(selection)
+    print N, "voids selected"
 
     # define binning
-    rbins = np.linspace(0.15, 2.4, 12)
+    rbins = np.linspace(0.25, 2.4, 10)
 
     # get bootstrap profiles
     print "bootstrapping may take a while..."
-    Emode, e_Emode, Bmode, e_Bmode, r_mean = stack_EBR(hdu[1].data, selection, rbins, rebinned=True, samples=5000, mean_method=kappa_sigma)
+    Emode, e_Emode, Bmode, e_Bmode, r_mean = stack_EBR(hdu[1].data, selection, rbins, rebinned=True, samples=5000, mean_method=np.mean)
     
     # compute chi^2 and likelihood ratio wrt to void model
     model = void_model(rbins)
-    K = likelihood_ratio(Emode, e_Emode,  model)
-    Chi2 = chi2(Emode, e_Emode,  model)
+    K = likelihood_ratio(Emode, e_Emode,  model, N)
+    Chi2 = chi2(Emode, e_Emode,  model, N)
     S_N = SNR(Emode, e_Emode, model)
 
     # plot data and model
